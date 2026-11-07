@@ -39,7 +39,7 @@
 </style>
 </head>
 <body>
-<div id="js-license-shield" role="dialog" aria-modal="true" aria-label="Validação de licença"><div class="lic-card"><h2 id="lic-title">Validando licença...</h2><p id="lic-message">Conectando ao servidor de assinaturas da JS Software.</p><code id="lic-code" hidden></code><button id="lic-retry" type="button" hidden>Tentar novamente</button><small id="lic-note">Os dados de vendas, parcelas e clientes permanecem intactos.</small></div></div><div id="js-license-warning" role="status"></div>
+<div id="js-license-shield" role="dialog" aria-modal="true" aria-label="Validação de licença"><div class="lic-card"><h2 id="lic-title">Validando licença...</h2><p id="lic-message">Conectando ao servidor de assinaturas da JS Software.</p><code id="lic-code" hidden></code><button id="lic-copy" type="button" hidden>Copiar identificador</button> <button id="lic-retry" type="button" hidden>Tentar novamente</button><small id="lic-note">Os dados de vendas, parcelas e clientes permanecem intactos.</small></div></div><div id="js-license-warning" role="status"></div>
   <div class="shell">
     <header class="header">
       <div class="brand">
@@ -604,11 +604,11 @@
 /* Licenciamento V2.3: bloqueio de interface; nunca modifica registros de vendas. */
 (async function(){
   'use strict';
-  const shield=document.getElementById('js-license-shield'),title=document.getElementById('lic-title'),msg=document.getElementById('lic-message'),code=document.getElementById('lic-code'),retry=document.getElementById('lic-retry'),warning=document.getElementById('js-license-warning');
+  const shield=document.getElementById('js-license-shield'),title=document.getElementById('lic-title'),msg=document.getElementById('lic-message'),code=document.getElementById('lic-code'),copy=document.getElementById('lic-copy'),retry=document.getElementById('lic-retry'),warning=document.getElementById('js-license-warning');
   const GRACE_MS=12*60*60*1000; // tolerância offline até 12 horas depois da última confirmação
   const CACHE='js_license_last_valid_'+JS_APP_ID;
   let db=null,user=null,unsub=null,loading=false;
-  const status=(t,m,id=null,allowRetry=true)=>{shield.classList.remove('hidden');title.textContent=t;msg.textContent=m;code.hidden=!id;if(id)code.textContent=id;retry.hidden=!allowRetry;};
+  const status=(t,m,id=null,allowRetry=true)=>{shield.classList.remove('hidden');title.textContent=t;msg.textContent=m;code.hidden=!id;copy.hidden=!id;if(id)code.textContent=id;retry.hidden=!allowRetry;};
   const lock=(t,m)=>{warning.style.display='none';status(t,m,user?.uid||null,true)};
   const notice=(days)=>{warning.textContent=days<=0?'Sua mensalidade vence hoje. Entre em contato para renovar.':`Sua mensalidade vence em ${days} dia(s). Regularize antes do vencimento.`;warning.style.display='block';warning.onclick=()=>alert(warning.textContent)};
   const unlock=(expiration)=>{shield.classList.add('hidden');retry.hidden=true;const days=Math.ceil((expiration.getTime()-Date.now())/86400000);if(days<=5)notice(days);else warning.style.display='none'};
@@ -646,6 +646,7 @@
       else status('Não foi possível conectar','O aplicativo precisa de uma conexão inicial para registrar e verificar a licença. Nenhum dado foi apagado.',null,true);
     }finally{loading=false}
   }
+  copy.addEventListener('click',async()=>{const uid=code.textContent.trim();if(!uid)return;try{await navigator.clipboard.writeText(uid);copy.textContent='Código copiado!';setTimeout(()=>copy.textContent='Copiar identificador',2000)}catch(e){const range=document.createRange();range.selectNodeContents(code);const sel=window.getSelection();sel.removeAllRanges();sel.addRange(range);copy.textContent='Selecione e copie o código';setTimeout(()=>copy.textContent='Copiar identificador',3000)}});
   retry.addEventListener('click',()=>check());
   window.addEventListener('online',()=>check(true));
   // Verifica periodicamente vencimentos e mudanças de estado, mesmo sem ação do usuário.
