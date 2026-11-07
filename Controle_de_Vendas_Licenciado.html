@@ -34,18 +34,49 @@
   <title>Crediário Fácil • Controle de vendas</title>
 <style>
 #js-license-shield{position:fixed;inset:0;z-index:999999;background:#0a1424;color:#eef5ff;display:flex;justify-content:center;align-items:center;padding:20px;font:15px system-ui,Arial,sans-serif}
-#js-license-shield.hidden{display:none!important}#js-license-shield .lic-card{width:min(450px,100%);border:1px solid #31445e;background:#14243a;border-radius:22px;box-shadow:0 16px 80px #0009;padding:25px;text-align:center}#js-license-shield h2{margin:0 0 10px;font-size:23px}#js-license-shield p{color:#c1cede;line-height:1.55}#js-license-shield code{display:block;background:#091827;border:1px solid #39516a;letter-spacing:.5px;border-radius:9px;font-size:14px;padding:12px;overflow-wrap:anywhere;margin:12px 0}#js-license-shield button{background:#21d3b2;color:#032c26;border:0;border-radius:10px;padding:12px 20px;font-weight:bold;cursor:pointer}#js-license-shield small{display:block;margin-top:12px;color:#8ba2ba}
+#js-license-shield.hidden{display:none!important}#js-license-shield .lic-card{width:min(450px,100%);border:1px solid #31445e;background:#14243a;border-radius:22px;box-shadow:0 16px 80px #0009;padding:25px;text-align:center}#js-license-shield h2{margin:0 0 10px;font-size:23px}#js-license-shield p{color:#c1cede;line-height:1.55}#js-license-shield code{display:block;background:#091827;border:1px solid #39516a;letter-spacing:.5px;border-radius:9px;font-size:14px;padding:12px;overflow-wrap:anywhere;margin:12px 0}#js-license-shield button{background:#21d3b2;color:#032c26;border:0;border-radius:10px;padding:12px 20px;font-weight:bold;cursor:pointer}#js-license-shield #lic-account{margin-top:9px;background:#2d496a;color:#fff}#js-license-shield small{display:block;margin-top:12px;color:#8ba2ba}
 #js-license-warning{display:none;position:fixed;top:0;left:0;right:0;z-index:99990;background:#6f421a;color:#fff;padding:8px 13px;text-align:center;font:12px system-ui;cursor:pointer}
+
+#js-account-panel{display:none;position:fixed;inset:0;z-index:1000001;align-items:center;justify-content:center;padding:18px;background:rgba(4,13,26,.9);font:15px system-ui,Arial,sans-serif;color:#f0f6ff;overflow:auto}
+#js-account-panel.active{display:flex}
+#js-account-panel .lic-card{width:min(465px,100%);max-height:92dvh;overflow:auto;background:#14243a;border:1px solid #385477;border-radius:18px;padding:22px;box-shadow:0 14px 90px #000a}
+#js-account-panel .acc-head{display:flex;justify-content:space-between;align-items:center;gap:12px}
+#js-account-panel .acc-head h2{font-size:22px;margin:0}
+#js-account-panel label{display:block;font-size:13px;font-weight:650;margin:15px 0 6px}
+#js-account-panel input{display:block;width:100%;border:1px solid #506b87;background:#081a2c;color:white;padding:13px;border-radius:9px;font:inherit}
+#js-account-panel button{background:#21d3b2;color:#032c26;border:0;border-radius:9px;padding:12px 15px;cursor:pointer;font:inherit;font-weight:750}
+#js-account-panel button.secondary{background:#2b496b;color:#fff}
+#js-account-panel .account-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:18px}
+#js-account-panel .muted{color:#bacbdf;line-height:1.45;font-size:13px}
+#js-account-panel #acc-msg{color:#ffb8b8;min-height:1.2em;overflow-wrap:anywhere}
+#js-account-panel #acc-identity{overflow-wrap:anywhere;background:#0a1d31;border-radius:9px;padding:10px;font-size:13px}
+#js-account-panel button:disabled{opacity:.5}
 </style>
 </head>
 <body>
-<div id="js-license-shield" role="dialog" aria-modal="true" aria-label="Validação de licença"><div class="lic-card"><h2 id="lic-title">Validando licença...</h2><p id="lic-message">Conectando ao servidor de assinaturas da JS Software.</p><code id="lic-code" hidden></code><button id="lic-copy" type="button" hidden>Copiar identificador</button> <button id="lic-retry" type="button" hidden>Tentar novamente</button><small id="lic-note">Os dados de vendas, parcelas e clientes permanecem intactos.</small></div></div><div id="js-license-warning" role="status"></div>
+<div id="js-license-shield" role="dialog" aria-modal="true" aria-label="Validação de licença"><div class="lic-card"><h2 id="lic-title">Validando licença...</h2><p id="lic-message">Conectando ao servidor de assinaturas da JS Software.</p><code id="lic-code" hidden></code><button id="lic-copy" type="button" hidden>Copiar identificador</button> <button id="lic-retry" type="button" hidden>Tentar novamente</button> <button id="lic-account" type="button" hidden>Entrar / criar conta</button><small id="lic-note">Os dados de vendas, parcelas e clientes permanecem intactos.</small></div></div><div id="js-license-warning" role="status"></div>
+<div id="js-account-panel" role="dialog" aria-modal="true" aria-label="Conta JS Software" aria-hidden="true">
+ <section class="lic-card">
+  <div class="acc-head"><h2>Minha conta JS Software</h2><button id="acc-close" class="secondary" type="button" aria-label="Fechar">✕</button></div>
+  <p id="acc-identity"></p>
+  <p class="muted">Use a mesma conta em outro celular ou computador para manter o mesmo identificador de licença.</p>
+  <form id="acc-form">
+   <label for="acc-email">E-mail da conta</label><input id="acc-email" type="email" required autocomplete="username" placeholder="email@exemplo.com">
+   <label for="acc-password">Senha (mínimo 6 caracteres)</label><input id="acc-password" type="password" required minlength="6" autocomplete="current-password" placeholder="Sua senha">
+   <div class="account-actions"><button id="acc-signin" type="submit">Entrar na conta</button><button id="acc-register" class="secondary" type="button">Criar conta / vincular licença</button></div>
+  </form>
+  <div class="account-actions"><button id="acc-signout" class="secondary" type="button" hidden>Sair da conta</button></div>
+  <p id="acc-msg" aria-live="polite"></p>
+  <p class="muted">IMPORTANTE: esta conta compartilha o acesso à licença, mas as vendas, parcelas e clientes ainda ficam salvos apenas neste navegador. Faça backup antes de trocar de aparelho ou limpar os dados.</p>
+ </section>
+</div>
   <div class="shell">
     <header class="header">
       <div class="brand">
         <div class="brand-logo">CF</div>
         <div><div class="brand-title" id="business-name">Crediário Fácil</div><div class="brand-sub">Seu controle de vendas</div></div>
       </div>
+      <button class="icon-button" id="js-account-open" type="button" aria-label="Minha conta JS Software" title="Minha conta">👤</button>
       <button class="icon-button" id="open-settings" type="button" aria-label="Abrir configurações" title="Configurações">⚙</button>
     </header>
 
@@ -279,7 +310,7 @@
       <div id="filter-items">${products.length?products.map(productCard).join(''):empty('Catálogo vazio','Também é possível digitar produtos diretamente na venda.')}</div></section>`+
       `<section class="card"><h2>Seus dados e backups</h2><p class="subtle">Tudo fica armazenado apenas neste navegador. Exportar um backup é indispensável para recuperar os dados se o aparelho for perdido, trocado ou resetado.</p>
       <div class="actions"><button type="button" data-action="export-json" class="btn primary">⬇ Backup completo (.json)</button><button type="button" data-action="import-json" class="btn">⬆ Restaurar backup</button><button type="button" data-action="export-csv" class="btn">⬇ Parcelas (.csv)</button></div>
-      <p class="warn"><strong>Atenção:</strong> este protótipo não sincroniza com outros celulares, não faz backup na nuvem e não possui login. Não apague os dados do navegador sem antes baixar o backup.</p></section>
+      <p class="warn"><strong>Atenção:</strong> o login permite usar a mesma licença em outros aparelhos, mas as vendas e parcelas não sincronizam automaticamente. Não há backup na nuvem. Faça backup antes de trocar de navegador ou apagar seus dados.</p></section>
       <p class="foot-note">Crediário Fácil v1.1 • Aplicativo local e offline. A cobrança pelo WhatsApp abre uma mensagem, mas só envia se você confirmar no WhatsApp. Não há integração automática de Pix ou boletos.</p>`;
   }
   function showModal(title,body){
@@ -601,59 +632,165 @@
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script src="./firebase-config.js"></script>
 <script>
-/* Licenciamento V2.3: bloqueio de interface; nunca modifica registros de vendas. */
+/* Licenciamento V3.0: licença por UID de conta, com migração de conta anônima; nunca apaga registros de vendas. */
 (async function(){
   'use strict';
-  const shield=document.getElementById('js-license-shield'),title=document.getElementById('lic-title'),msg=document.getElementById('lic-message'),code=document.getElementById('lic-code'),copy=document.getElementById('lic-copy'),retry=document.getElementById('lic-retry'),warning=document.getElementById('js-license-warning');
-  const GRACE_MS=12*60*60*1000; // tolerância offline até 12 horas depois da última confirmação
-  const CACHE='js_license_last_valid_'+JS_APP_ID;
-  let db=null,user=null,unsub=null,loading=false;
-  const status=(t,m,id=null,allowRetry=true)=>{shield.classList.remove('hidden');title.textContent=t;msg.textContent=m;code.hidden=!id;copy.hidden=!id;if(id)code.textContent=id;retry.hidden=!allowRetry;};
-  const lock=(t,m)=>{warning.style.display='none';status(t,m,user?.uid||null,true)};
-  const notice=(days)=>{warning.textContent=days<=0?'Sua mensalidade vence hoje. Entre em contato para renovar.':`Sua mensalidade vence em ${days} dia(s). Regularize antes do vencimento.`;warning.style.display='block';warning.onclick=()=>alert(warning.textContent)};
-  const unlock=(expiration)=>{shield.classList.add('hidden');retry.hidden=true;const days=Math.ceil((expiration.getTime()-Date.now())/86400000);if(days<=5)notice(days);else warning.style.display='none'};
-  const isGood=v=>v && v.status==='ATIVO' && v.expiresAt && typeof v.expiresAt.toDate==='function' && v.expiresAt.toDate().getTime()>Date.now();
+  const $=id=>document.getElementById(id);
+  const shield=$('js-license-shield'),title=$('lic-title'),msg=$('lic-message'),code=$('lic-code'),copy=$('lic-copy'),
+        retry=$('lic-retry'),warning=$('js-license-warning'),openLocked=$('lic-account'),openHeader=$('js-account-open'),
+        accountPanel=$('js-account-panel'),closeAccountButton=$('acc-close'),identity=$('acc-identity'),
+        emailInput=$('acc-email'),passwordInput=$('acc-password'),signin=$('acc-signin'),register=$('acc-register'),
+        signout=$('acc-signout'),accountMessage=$('acc-msg');
+  const GRACE_MS=12*60*60*1000, CACHE='js_license_last_valid_'+JS_APP_ID;
+  if(!firebase.apps.length)firebase.initializeApp(JS_FIREBASE_CONFIG);
+  const auth=firebase.auth(),db=firebase.firestore();
+  let user=null,unsub=null,loading=false,accountBusy=false;
+  // Aguarda a recuperação da sessão persistente antes de criar qualquer nova identidade anônima.
+  const authInitialized=new Promise((resolve,reject)=>{
+    const stop=auth.onAuthStateChanged(()=>{stop();resolve()},reject);
+  });
+  const status=(t,m,id=null,allowRetry=true)=>{
+    shield.classList.remove('hidden');title.textContent=t;msg.textContent=m;
+    code.hidden=!id;copy.hidden=!id;if(id)code.textContent=id;
+    retry.hidden=!allowRetry;openLocked.hidden=false;
+  };
+  const lock=(t,m)=>{warning.style.display='none';status(t,m,user&&user.uid||null,true)};
+  const notice=days=>{
+    warning.textContent=days<=0?'Sua mensalidade vence hoje. Entre em contato para renovar.':'Sua mensalidade vence em '+days+' dia(s). Regularize antes do vencimento.';
+    warning.style.display='block';warning.onclick=()=>alert(warning.textContent);
+  };
+  const unlock=expiration=>{
+    shield.classList.add('hidden');retry.hidden=true;openLocked.hidden=true;
+    const days=Math.ceil((expiration.getTime()-Date.now())/86400000);
+    if(days<=5)notice(days);else warning.style.display='none';
+  };
+  const isGood=v=>v&&v.status==='ATIVO'&&v.expiresAt&&typeof v.expiresAt.toDate==='function'&&v.expiresAt.toDate().getTime()>Date.now();
   const lastGood=()=>{try{return JSON.parse(localStorage.getItem(CACHE)||'null')}catch{return null}};
-  const allowOffline=()=>{const c=lastGood(),now=Date.now();return c && c.uid===user?.uid && c.verifiedAt<=now && now-c.verifiedAt<GRACE_MS && c.expiresAt>now};
+  const allowOffline=()=>{const c=lastGood(),now=Date.now();return !!(c&&c.uid===(user&&user.uid)&&c.verifiedAt<=now&&now-c.verifiedAt<GRACE_MS&&c.expiresAt>now)};
   const writeCache=v=>{try{localStorage.setItem(CACHE,JSON.stringify({uid:user.uid,verifiedAt:Date.now(),expiresAt:v.expiresAt.toDate().getTime()}))}catch{}};
   async function check(silent=false){
-    if(loading)return;loading=true;if(!silent)status('Verificando assinatura','Consultando o servidor da JS Software...',null,false);
+    if(loading||accountBusy)return;
+    loading=true;
+    if(!silent)status('Verificando assinatura','Consultando o servidor da JS Software...',null,false);
     try{
-      if(!firebase.apps.length)firebase.initializeApp(JS_FIREBASE_CONFIG);
-      const auth=firebase.auth();
-      user=auth.currentUser|| (await auth.signInAnonymously()).user;
-      db=firebase.firestore();
+      await authInitialized;
+      user=auth.currentUser||(await auth.signInAnonymously()).user;
       if(unsub){unsub();unsub=null}
       const doc=db.collection('appLicenses').doc(JS_APP_ID).collection('devices').doc(user.uid);
-      // get({source:'server'}) impede liberar com licença antiga obtida de cache do Firestore.
+      // Exige confirmação no servidor; não libera somente por cache do Firestore.
       const snap=await doc.get({source:'server'});
-      if(!snap.exists){lock('Aguardando ativação','Envie o identificador abaixo ao fornecedor para ativar sua mensalidade. Nenhum dado será apagado.');return}
+      if(!snap.exists){lock('Aguardando ativação','Esta conta ainda não tem licença ativa. Envie seu identificador ao fornecedor, ou entre em uma conta já ativada.');return}
       const v=snap.data();
       if(!isGood(v)){lock('Acesso suspenso','Licença vencida, cancelada ou ainda não aprovada. Seus dados estão preservados.');return}
       writeCache(v);unlock(v.expiresAt.toDate());
-      // Observa alterações enquanto aberto; reconexões devem consultar servidor novamente.
       unsub=doc.onSnapshot({includeMetadataChanges:true},ss=>{
-        if(ss.metadata.fromCache)return; // Apenas eventos confirmados pelo servidor
+        if(ss.metadata.fromCache||accountBusy)return;
         if(!ss.exists){lock('Acesso suspenso','Licença removida ou indisponível. Seus dados estão preservados.');return}
-        const curr=ss.data();if(!isGood(curr)){lock('Acesso suspenso','Mensalidade vencida ou acesso desativado. Seus dados estão preservados.');return}
+        const curr=ss.data();
+        if(!isGood(curr)){lock('Acesso suspenso','Mensalidade vencida ou acesso desativado. Seus dados estão preservados.');return}
         writeCache(curr);unlock(curr.expiresAt.toDate());
-      },err=>{if(!allowOffline())lock('Sem conexão com o servidor','Não foi possível validar sua assinatura. Verifique a conexão.');});
+      },err=>{if(!allowOffline())lock('Sem conexão com o servidor','Não foi possível validar sua assinatura. Verifique a conexão.')});
     }catch(err){
       console.warn('Validação de licença:',err.code||err.message);
       if(allowOffline()){
-        shield.classList.add('hidden');warning.textContent='Você está usando a tolerância offline de até 12 horas. Conecte-se à internet para verificar a licença.';warning.style.display='block';
-      }else if(user){lock('Acesso não autorizado ou sem conexão','Se a licença já foi adquirida, envie seu identificador ao fornecedor. Confira também sua conexão com a internet.');}
-      else status('Não foi possível conectar','O aplicativo precisa de uma conexão inicial para registrar e verificar a licença. Nenhum dado foi apagado.',null,true);
+        shield.classList.add('hidden');warning.textContent='Modo offline: você tem até 12 horas após a última verificação válida.';warning.style.display='block';
+      }else if(user)lock('Acesso não autorizado ou sem conexão','Entre na conta correta ou envie o identificador ao fornecedor. Verifique a conexão com a internet.');
+      else status('Não foi possível conectar','É necessário conectar à internet para registrar e validar a licença. Nenhum dado foi apagado.',null,true);
     }finally{loading=false}
   }
-  copy.addEventListener('click',async()=>{const uid=code.textContent.trim();if(!uid)return;try{await navigator.clipboard.writeText(uid);copy.textContent='Código copiado!';setTimeout(()=>copy.textContent='Copiar identificador',2000)}catch(e){const range=document.createRange();range.selectNodeContents(code);const sel=window.getSelection();sel.removeAllRanges();sel.addRange(range);copy.textContent='Selecione e copie o código';setTimeout(()=>copy.textContent='Copiar identificador',3000)}});
+  function updateAccountPanel(){
+    const current=auth.currentUser;
+    if(current&&!current.isAnonymous){
+      identity.textContent='Conta: '+(current.email||'sem e-mail')+' | Identificador da licença: '+current.uid;
+      register.hidden=true;signout.hidden=false;
+    }else{
+      identity.textContent='Instalação temporária, sem conta. Identificador: '+(current&&current.uid||'aguardando');
+      register.hidden=false;signout.hidden=true;
+    }
+  }
+  function openAccountPanel(){
+    updateAccountPanel();accountMessage.textContent='';
+    passwordInput.value='';
+    if(auth.currentUser&&auth.currentUser.email)emailInput.value=auth.currentUser.email;
+    accountPanel.classList.add('active');accountPanel.setAttribute('aria-hidden','false');emailInput.focus();
+  }
+  function closeAccountPanel(){
+    accountPanel.classList.remove('active');accountPanel.setAttribute('aria-hidden','true');
+    passwordInput.value='';accountMessage.textContent='';
+  }
+  function authError(err){
+    const messages={
+      'auth/email-already-in-use':'Este e-mail já possui conta. Use Entrar na conta.',
+      'auth/credential-already-in-use':'Este e-mail já está vinculado a outra conta. Use Entrar na conta.',
+      'auth/invalid-email':'E-mail inválido.',
+      'auth/weak-password':'A senha precisa de pelo menos 6 caracteres.',
+      'auth/invalid-credential':'E-mail ou senha incorretos.',
+      'auth/wrong-password':'Senha incorreta.',
+      'auth/user-not-found':'Conta não encontrada.',
+      'auth/operation-not-allowed':'Login por e-mail e senha não está habilitado no Firebase.',
+      'auth/network-request-failed':'Falha de conexão com a internet.',
+      'auth/too-many-requests':'Muitas tentativas. Aguarde antes de tentar novamente.'
+    };
+    return messages[err&&err.code]||('Falha ao autenticar: '+(err&&err.code||'erro desconhecido'));
+  }
+  async function accountAction(mode){
+    if(accountBusy)return;
+    if(loading){accountMessage.textContent='Aguarde a verificação de licença terminar e tente novamente.';return}
+    const email=emailInput.value.trim(),password=passwordInput.value;
+    if(!email||password.length<6){accountMessage.textContent='Informe um e-mail válido e uma senha com pelo menos 6 caracteres.';return}
+    accountBusy=true;accountMessage.style.color='#e0ecff';accountMessage.textContent='Conectando ao Firebase...';
+    signin.disabled=true;register.disabled=true;
+    try{
+      await authInitialized;
+      if(mode==='register'){
+        if(auth.currentUser&&!auth.currentUser.isAnonymous)throw {code:'auth/account-already-linked'};
+        const credential=firebase.auth.EmailAuthProvider.credential(email,password);
+        // linkWithCredential mantém o UID da instalação anônima e a licença já concedida.
+        if(auth.currentUser)await auth.currentUser.linkWithCredential(credential);
+        else await auth.createUserWithEmailAndPassword(email,password);
+      }else{
+        await auth.signInWithEmailAndPassword(email,password);
+      }
+      if(unsub){unsub();unsub=null}
+      user=auth.currentUser;
+      closeAccountPanel();
+    }catch(err){
+      accountMessage.style.color='#ffb8b8';
+      accountMessage.textContent=err&&err.code==='auth/account-already-linked'?'Esta instalação já tem uma conta. Use Entrar se quiser mudar de conta.':authError(err);
+      return;
+    }finally{
+      accountBusy=false;signin.disabled=false;register.disabled=false;
+    }
+    await check();
+  }
+  copy.addEventListener('click',async()=>{
+    const uid=code.textContent.trim();if(!uid)return;
+    try{await navigator.clipboard.writeText(uid);copy.textContent='Código copiado!';setTimeout(()=>copy.textContent='Copiar identificador',2000)}
+    catch(e){const range=document.createRange();range.selectNodeContents(code);const sel=window.getSelection();sel.removeAllRanges();sel.addRange(range);copy.textContent='Selecione e copie o código';setTimeout(()=>copy.textContent='Copiar identificador',3000)}
+  });
   retry.addEventListener('click',()=>check());
+  openLocked.addEventListener('click',openAccountPanel);
+  openHeader.addEventListener('click',openAccountPanel);
+  closeAccountButton.addEventListener('click',closeAccountPanel);
+  accountPanel.addEventListener('click',e=>{if(e.target===accountPanel)closeAccountPanel()});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&accountPanel.classList.contains('active'))closeAccountPanel()});
+  $('acc-form').addEventListener('submit',e=>{e.preventDefault();accountAction('signin')});
+  register.addEventListener('click',()=>accountAction('register'));
+  signout.addEventListener('click',async()=>{
+    if(accountBusy||loading)return;
+    if(!confirm('Sair desta conta? O acesso à licença será interrompido neste aparelho. Dados locais NÃO são apagados, mas também NÃO são protegidos por conta de usuário.'))return;
+    accountBusy=true;
+    try{
+      if(unsub){unsub();unsub=null}
+      await auth.signOut();user=null;closeAccountPanel();
+    }catch(err){accountMessage.textContent=authError(err);return}
+    finally{accountBusy=false}
+    await check();
+  });
   window.addEventListener('online',()=>check(true));
-  // Verifica periodicamente vencimentos e mudanças de estado, mesmo sem ação do usuário.
-  setInterval(()=>{if(user)check(true)},5*60*1000);
-  // Não manter acesso offline além da tolerância caso não haja eventos de rede.
-  setInterval(()=>{if(user && !navigator.onLine && !allowOffline())lock('Assinatura precisa ser verificada','O prazo de verificação offline terminou. Reconecte para validar sua licença.')},60*1000);
-  check();
+  setInterval(()=>{if(user&&!accountBusy)check(true)},5*60*1000);
+  setInterval(()=>{if(user&&!navigator.onLine&&!allowOffline())lock('Assinatura precisa ser verificada','O prazo de verificação offline terminou. Reconecte para validar sua licença.')},60*1000);
+  await check();
 })();
 </script>
 </body>
