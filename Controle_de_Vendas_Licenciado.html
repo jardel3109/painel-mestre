@@ -54,7 +54,7 @@
 </style>
 </head>
 <body>
-<div id="js-license-shield" role="dialog" aria-modal="true" aria-label="Validação de licença"><div class="lic-card"><h2 id="lic-title">Validando licença...</h2><p id="lic-message">Conectando ao servidor de assinaturas da JS Software.</p><code id="lic-code" hidden></code><button id="lic-copy" type="button" hidden>Copiar identificador</button> <button id="lic-retry" type="button" hidden>Tentar novamente</button> <button id="lic-account" type="button" hidden>Entrar / criar conta</button><small id="lic-note">Os dados de vendas, parcelas e clientes permanecem intactos.</small></div></div><div id="js-license-warning" role="status"></div>
+<div id="js-license-shield" role="dialog" aria-modal="true" aria-label="Validação de licença"><div class="lic-card"><h2 id="lic-title">Validando licença...</h2><p id="lic-message">Conectando ao servidor de assinaturas da JS Software.</p><p id="lic-session" style="font-size:13px;color:#9fe6d7;margin:6px 0 12px;font-weight:700"></p><code id="lic-code" hidden></code><button id="lic-copy" type="button" hidden>Copiar identificador</button> <button id="lic-retry" type="button" hidden>Tentar novamente</button> <button id="lic-account" type="button" hidden>Entrar / criar conta</button><small id="lic-note">Os dados de vendas, parcelas e clientes permanecem intactos.</small></div></div><div id="js-license-warning" role="status"></div>
 <div id="js-account-panel" role="dialog" aria-modal="true" aria-label="Conta JS Software" aria-hidden="true">
  <section class="lic-card">
   <div class="acc-head"><h2>Minha conta JS Software</h2><button id="acc-close" class="secondary" type="button" aria-label="Fechar">✕</button></div>
@@ -636,7 +636,7 @@
 (async function(){
   'use strict';
   const $=id=>document.getElementById(id);
-  const shield=$('js-license-shield'),title=$('lic-title'),msg=$('lic-message'),code=$('lic-code'),copy=$('lic-copy'),
+  const shield=$('js-license-shield'),title=$('lic-title'),msg=$('lic-message'),code=$('lic-code'),session=$('lic-session'),copy=$('lic-copy'),
         retry=$('lic-retry'),warning=$('js-license-warning'),openLocked=$('lic-account'),openHeader=$('js-account-open'),
         accountPanel=$('js-account-panel'),closeAccountButton=$('acc-close'),identity=$('acc-identity'),
         emailInput=$('acc-email'),passwordInput=$('acc-password'),signin=$('acc-signin'),register=$('acc-register'),
@@ -654,7 +654,7 @@
     code.hidden=!id;copy.hidden=!id;if(id)code.textContent=id;
     retry.hidden=!allowRetry;openLocked.hidden=false;
   };
-  const lock=(t,m)=>{warning.style.display='none';status(t,m,user&&user.uid||null,true)};
+  const lock=(t,m)=>{warning.style.display='none';const u=auth.currentUser||user;session.textContent=u&&!u.isAnonymous?'✓ Login realizado: '+(u.email||'conta vinculada'):'Modo visitante: nenhum e-mail conectado';status(t,m,u&&u.uid||null,true)};
   const notice=days=>{
     warning.textContent=days<=0?'Sua mensalidade vence hoje. Entre em contato para renovar.':'Sua mensalidade vence em '+days+' dia(s). Regularize antes do vencimento.';
     warning.style.display='block';warning.onclick=()=>alert(warning.textContent);
@@ -679,7 +679,7 @@
       const doc=db.collection('appLicenses').doc(JS_APP_ID).collection('devices').doc(user.uid);
       // Exige confirmação no servidor; não libera somente por cache do Firestore.
       const snap=await doc.get({source:'server'});
-      if(!snap.exists){lock('Aguardando ativação','Esta conta ainda não tem licença ativa. Envie seu identificador ao fornecedor, ou entre em uma conta já ativada.');return}
+      if(!snap.exists){lock('Aguardando ativação',user&&!user.isAnonymous?'Seu login funcionou. Falta ativar a licença desta conta no Painel Mestre. Não crie outra conta.':'Este navegador está como visitante e ainda não tem licença. Use Entrar / criar conta para vincular uma conta antes de pedir ativação.');return}
       const v=snap.data();
       if(!isGood(v)){lock('Acesso suspenso','Licença vencida, cancelada ou ainda não aprovada. Seus dados estão preservados.');return}
       writeCache(v);unlock(v.expiresAt.toDate());
